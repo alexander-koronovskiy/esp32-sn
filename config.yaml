@@ -1,0 +1,87 @@
+# Конфигурация проекта Sleep Stage Classifier
+
+# Пути к данным
+data:
+  train_path: "data/train_data.csv"
+  test_path: "data/test_data.csv"
+  validation_path: "data/validation_data.csv"
+  raw_data_path: "data/raw/"
+
+# Параметры обработки данных
+preprocessing:
+  sampling_rate: 256  # Частота дискретизации ЭЭГ
+  window_size: 30     # Размер окна в секундах
+  overlap: 0.5        # Перекрытие окон
+  normalize: true
+  filter_bands:
+    - [0.5, 4.0]    # Дельта
+    - [4.0, 8.0]    # Тета
+    - [8.0, 13.0]   # Альфа
+    - [13.0, 30.0]  # Бета
+    - [30.0, 100.0] # Гамма
+
+# Извлечение признаков
+features:
+  time_domain: true
+  frequency_domain: true
+  statistical: true
+  spectral_power: true
+  entropy: true
+  correlation: true
+
+# Параметры модели
+model:
+  type: "random_forest"  # random_forest, svm, neural_network, xgboost
+  random_state: 42
+  test_size: 0.2
+  validation_size: 0.1
+  
+  # Параметры для Random Forest
+  random_forest:
+    n_estimators: 100
+    max_depth: 10
+    min_samples_split: 2
+    min_samples_leaf: 1
+    
+  # Параметры для SVM
+  svm:
+    C: 1.0
+    kernel: "rbf"
+    gamma: "scale"
+    
+  # Параметры для нейронной сети
+  neural_network:
+    hidden_layer_sizes: [100, 50]
+    activation: "relu"
+    solver: "adam"
+    alpha: 0.0001
+    max_iter: 1000
+
+# Обучение
+training:
+  batch_size: 32
+  epochs: 100
+  learning_rate: 0.001
+  early_stopping_patience: 10
+  
+# Оценка
+evaluation:
+  metrics: ["accuracy", "precision", "recall", "f1", "confusion_matrix"]
+  cross_validation_folds: 5
+  
+# Сохранение моделей
+output:
+  model_path: "models/"
+  results_path: "results/"
+  logs_path: "logs/"
+  
+# Логирование
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+# Эксперименты
+experiments:
+  use_wandb: false
+  use_mlflow: true
+  experiment_name: "sleep_stage_classification" 
