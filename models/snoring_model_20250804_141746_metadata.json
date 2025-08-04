@@ -1,0 +1,31 @@
+{
+  "model_type": "random_forest",
+  "feature_names": [
+    "rms",
+    "std",
+    "max",
+    "range",
+    "energy",
+    "abs_mean",
+    "zero_crossings",
+    "snoring_low_power",
+    "snoring_mid_power",
+    "snoring_high_power",
+    "speech_power",
+    "snoring_low_intensity",
+    "snoring_mid_intensity",
+    "snoring_high_intensity",
+    "snoring_regularity"
+  ],
+  "class_names": [
+    "No_Snoring",
+    "Light_Snoring",
+    "Heavy_Snoring",
+    "Snoring_Start",
+    "Snoring_End"
+  ],
+  "max_depth": 10,
+  "max_features": 15,
+  "random_state": 42,
+  "saved_date": "2025-08-04T14:17:46.540718"
+}
