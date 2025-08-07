@@ -108,6 +108,11 @@ def create_comprehensive_visualization(segments, labels, predictions, features_d
     # Цветовая карта классов храпа
     segment_times = np.arange(len(labels))
     segment_colors = np.array(colors)[labels]
+    # Убеждаемся, что размеры совпадают
+    if len(segment_times) != len(segment_colors):
+        min_len = min(len(segment_times), len(segment_colors))
+        segment_times = segment_times[:min_len]
+        segment_colors = segment_colors[:min_len]
     axes[1].scatter(segment_times, np.ones_like(segment_times), c=segment_colors, s=100, alpha=0.8)
     axes[1].set_title('Истинные классы храпа', fontsize=14)
     axes[1].set_xlabel('Номер сегмента', fontsize=12)
@@ -115,6 +120,11 @@ def create_comprehensive_visualization(segments, labels, predictions, features_d
     
     # Предсказанные классы
     pred_colors = np.array(colors)[predictions]
+    # Убеждаемся, что размеры совпадают
+    if len(segment_times) != len(pred_colors):
+        min_len = min(len(segment_times), len(pred_colors))
+        segment_times = segment_times[:min_len]
+        pred_colors = pred_colors[:min_len]
     axes[2].scatter(segment_times, np.ones_like(segment_times), c=pred_colors, s=100, alpha=0.8)
     axes[2].set_title('Предсказанные классы храпа', fontsize=14)
     axes[2].set_xlabel('Номер сегмента', fontsize=12)
