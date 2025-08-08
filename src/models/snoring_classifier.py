@@ -16,28 +16,38 @@ import os
 import json
 from datetime import datetime
 
+# Импорт LightGBM
+try:
+    from lightgbm import LGBMClassifier
+    LIGHTGBM_AVAILABLE = True
+except ImportError:
+    LIGHTGBM_AVAILABLE = False
+
 
 class SnoringClassifier:
     """Классификатор для детекции храпа."""
     
-    def __init__(self, model_type: str = 'random_forest', max_depth: int = 10, 
-                 max_features: int = 15, random_state: int = 42):
+    def __init__(self, model_type: str = 'lightgbm', max_depth: int = 6, 
+                 n_estimators: int = 150, learning_rate: float = 0.05, 
+                 random_state: int = 42):
         """
         Инициализация классификатора храпа.
         
         Args:
-            model_type: Тип модели ('random_forest', 'svm', 'logistic', 'decision_tree')
+            model_type: Тип модели ('lightgbm', 'random_forest', 'svm', 'logistic', 'decision_tree')
             max_depth: Максимальная глубина дерева
-            max_features: Максимальное количество признаков
+            n_estimators: Количество деревьев (для LightGBM и Random Forest)
+            learning_rate: Скорость обучения (для LightGBM)
             random_state: Случайное состояние
         """
         self.model_type = model_type
         self.max_depth = max_depth
-        self.max_features = max_features
+        self.n_estimators = n_estimators
+        self.learning_rate = learning_rate
         self.random_state = random_state
         self.model = None
         self.feature_names = []
-        self.class_names = ['No_Snoring', 'Light_Snoring', 'Heavy_Snoring', 'Snoring_Start', 'Snoring_End']
+        self.class_names = ['No_Snoring', 'Snoring']  # Бинарная классификация
         
     def create_model(self) -> Any:
         """
@@ -46,11 +56,23 @@ class SnoringClassifier:
         Returns:
             Модель классификатора
         """
-        if self.model_type == 'random_forest':
-            return RandomForestClassifier(
-                n_estimators=100,
+        if self.model_type == 'lightgbm':
+            if not LIGHTGBM_AVAILABLE:
+                raise ImportError("LightGBM не установлен. Установите: pip install lightgbm")
+            return LGBMClassifier(
+                n_estimators=self.n_estimators,
                 max_depth=self.max_depth,
-                max_features=self.max_features,
+                learning_rate=self.learning_rate,
+                reg_lambda=1.0,  # L2 регуляризация
+                scale_pos_weight=1.0,  # Компенсация дисбаланса
+                random_state=self.random_state,
+                verbose=-1
+            )
+        
+        elif self.model_type == 'random_forest':
+            return RandomForestClassifier(
+                n_estimators=self.n_estimators,
+                max_depth=self.max_depth,
                 random_state=self.random_state,
                 n_jobs=-1
             )
@@ -74,7 +96,6 @@ class SnoringClassifier:
         elif self.model_type == 'decision_tree':
             return DecisionTreeClassifier(
                 max_depth=self.max_depth,
-                max_features=self.max_features,
                 random_state=self.random_state
             )
         
@@ -100,30 +121,22 @@ class SnoringClassifier:
         # Создаем модель
         self.model = self.create_model()
         
-        # Обучаем модель
+        # Обучение
         self.model.fit(X, y)
         
-        # Оцениваем на обучающих данных
+        # Оценка производительности
         y_pred = self.model.predict(X)
         accuracy = accuracy_score(y, y_pred)
         
         # Кросс-валидация
         cv_scores = cross_val_score(self.model, X, y, cv=5, scoring='accuracy')
         
-        # Детальный отчет
-        report = classification_report(y, y_pred, target_names=self.class_names, output_dict=True)
-        
-        metrics = {
-            'train_accuracy': accuracy,
-            'cv_mean': cv_scores.mean(),
-            'cv_std': cv_scores.std(),
-            'classification_report': report,
-            'model_type': self.model_type,
-            'feature_count': X.shape[1],
-            'class_distribution': dict(zip(self.class_names, np.bincount(y)))
+        return {
+            'accuracy': float(accuracy),
+            'cv_mean': float(cv_scores.mean()),
+            'cv_std': float(cv_scores.std()),
+            'model_type': self.model_type
         }
-        
-        return metrics
     
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -191,8 +204,8 @@ class SnoringClassifier:
         proba = self.predict_proba(combined_features.reshape(1, -1))[0]
         
         # Анализируем вероятность будущего храпа
-        snoring_proba = proba[1] + proba[2] + proba[3]  # Light + Heavy + Start
-        no_snoring_proba = proba[0]  # No_Snoring
+        snoring_proba = proba[1]  # Вероятность храпа
+        no_snoring_proba = proba[0]  # Вероятность отсутствия храпа
         
         # Оценка риска храпа
         risk_level = "low"
@@ -231,17 +244,8 @@ class SnoringClassifier:
         proba = self.predict_proba(feature_vector.reshape(1, -1))[0]
         
         # Анализируем результат
-        is_snoring = prediction in [1, 2, 3]  # Light, Heavy, Start
-        snoring_intensity = "none"
-        
-        if prediction == 1:
-            snoring_intensity = "light"
-        elif prediction == 2:
-            snoring_intensity = "heavy"
-        elif prediction == 3:
-            snoring_intensity = "start"
-        elif prediction == 4:
-            snoring_intensity = "end"
+        is_snoring = prediction == 1  # Бинарная классификация
+        snoring_intensity = "heavy" if proba[1] > 0.7 else "light" if proba[1] > 0.4 else "none"
         
         return {
             'is_snoring': bool(is_snoring),
@@ -254,10 +258,10 @@ class SnoringClassifier:
     
     def evaluate(self, X: np.ndarray, y: np.ndarray) -> Dict[str, Any]:
         """
-        Оценивает модель на тестовых данных.
+        Оценивает производительность модели.
         
         Args:
-            X: Тестовые признаки
+            X: Признаки для оценки
             y: Истинные метки
             
         Returns:
@@ -267,7 +271,7 @@ class SnoringClassifier:
             raise ValueError("Модель не обучена. Сначала вызовите train().")
         
         # Предсказания
-        y_pred = self.predict(X)
+        y_pred = self.model.predict(X)
         y_proba = self.predict_proba(X)
         
         # Метрики
@@ -275,22 +279,22 @@ class SnoringClassifier:
         report = classification_report(y, y_pred, target_names=self.class_names, output_dict=True)
         conf_matrix = confusion_matrix(y, y_pred)
         
-        # Дополнительные метрики для храпа
+        # Специфичные для храпа метрики
         snoring_detection_accuracy = self._calculate_snoring_detection_accuracy(y, y_pred)
         
         return {
-            'accuracy': accuracy,
-            'predictions': y_pred.tolist(),
-            'probabilities': y_proba.tolist(),
+            'accuracy': float(accuracy),
+            'snoring_detection_accuracy': float(snoring_detection_accuracy),
             'classification_report': report,
             'confusion_matrix': conf_matrix.tolist(),
-            'snoring_detection_accuracy': snoring_detection_accuracy,
-            'class_names': self.class_names
+            'precision': float(report['weighted avg']['precision']),
+            'recall': float(report['weighted avg']['recall']),
+            'f1_score': float(report['weighted avg']['f1-score'])
         }
     
     def _calculate_snoring_detection_accuracy(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
         """
-        Вычисляет точность детекции храпа (все классы храпа vs нет храпа).
+        Вычисляет точность детекции храпа.
         
         Args:
             y_true: Истинные метки
@@ -299,11 +303,14 @@ class SnoringClassifier:
         Returns:
             Точность детекции храпа
         """
-        # Преобразуем в бинарную классификацию: храп vs нет храпа
-        y_true_binary = (y_true != 0).astype(int)  # 0 = No_Snoring
-        y_pred_binary = (y_pred != 0).astype(int)
+        # Подсчитываем правильные предсказания храпа
+        snoring_correct = np.sum((y_true == 1) & (y_pred == 1))
+        snoring_total = np.sum(y_true == 1)
         
-        return accuracy_score(y_true_binary, y_pred_binary)
+        if snoring_total == 0:
+            return 0.0
+        
+        return snoring_correct / snoring_total
     
     def save_model(self, file_path: str):
         """
@@ -324,17 +331,17 @@ class SnoringClassifier:
         # Сохраняем метаданные
         metadata = {
             'model_type': self.model_type,
+            'max_depth': self.max_depth,
+            'n_estimators': self.n_estimators,
+            'learning_rate': self.learning_rate,
             'feature_names': self.feature_names,
             'class_names': self.class_names,
-            'max_depth': self.max_depth,
-            'max_features': self.max_features,
-            'random_state': self.random_state,
-            'saved_date': datetime.now().isoformat()
+            'created_at': datetime.now().isoformat()
         }
         
         metadata_path = file_path.replace('.pkl', '_metadata.json')
-        with open(metadata_path, 'w', encoding='utf-8') as f:
-            json.dump(metadata, f, indent=2, ensure_ascii=False)
+        with open(metadata_path, 'w') as f:
+            json.dump(metadata, f, indent=2)
     
     def load_model(self, file_path: str):
         """
@@ -343,38 +350,36 @@ class SnoringClassifier:
         Args:
             file_path: Путь к модели
         """
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"Файл модели не найден: {file_path}")
-        
         # Загружаем модель
         self.model = joblib.load(file_path)
         
         # Загружаем метаданные
         metadata_path = file_path.replace('.pkl', '_metadata.json')
         if os.path.exists(metadata_path):
-            with open(metadata_path, 'r', encoding='utf-8') as f:
+            with open(metadata_path, 'r') as f:
                 metadata = json.load(f)
                 self.model_type = metadata.get('model_type', self.model_type)
-                self.feature_names = metadata.get('feature_names', [])
-                self.class_names = metadata.get('class_names', self.class_names)
                 self.max_depth = metadata.get('max_depth', self.max_depth)
-                self.max_features = metadata.get('max_features', self.max_features)
-                self.random_state = metadata.get('random_state', self.random_state)
+                self.n_estimators = metadata.get('n_estimators', self.n_estimators)
+                self.learning_rate = metadata.get('learning_rate', self.learning_rate)
+                self.feature_names = metadata.get('feature_names', self.feature_names)
+                self.class_names = metadata.get('class_names', self.class_names)
 
 
 def create_snoring_classifier(config: Dict) -> SnoringClassifier:
     """
-    Создает классификатор храпа на основе конфигурации.
+    Создает экземпляр SnoringClassifier с заданной конфигурацией.
     
     Args:
-        config: Конфигурация
+        config: Конфигурация модели
         
     Returns:
-        Классификатор храпа
+        Экземпляр SnoringClassifier
     """
     return SnoringClassifier(
-        model_type=config.get('model_type', 'random_forest'),
-        max_depth=config.get('max_depth', 10),
-        max_features=config.get('max_features', 15),
+        model_type=config.get('model_type', 'lightgbm'),
+        max_depth=config.get('max_depth', 6),
+        n_estimators=config.get('n_estimators', 150),
+        learning_rate=config.get('learning_rate', 0.05),
         random_state=config.get('random_state', 42)
     ) 
