@@ -27,7 +27,7 @@ def create_synthetic_data():
     labels = []
     
     # Классы храпа
-    class_names = ['No_Snoring', 'Light_Snoring', 'Heavy_Snoring', 'Snoring_Start', 'Snoring_End']
+    class_names = ['No_Snoring', 'Light_Snoring', 'Heavy_Snoring']
     colors = ['#2E8B57', '#FFD700', '#FF4500', '#FF69B4', '#9370DB']
     
     for i in range(n_segments):

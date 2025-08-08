@@ -23,8 +23,6 @@
 #define NO_SNORING 0
 #define LIGHT_SNORING 1
 #define HEAVY_SNORING 2
-#define SNORING_START 3
-#define SNORING_END 4
 
 // Буферы для обработки
 float audio_buffer[SEGMENT_LENGTH];
@@ -216,8 +214,6 @@ const char* get_snoring_class_name(int class_id) {
         case NO_SNORING: return "No_Snoring";
         case LIGHT_SNORING: return "Light_Snoring";
         case HEAVY_SNORING: return "Heavy_Snoring";
-        case SNORING_START: return "Snoring_Start";
-        case SNORING_END: return "Snoring_End";
         default: return "Unknown";
     }
 }
@@ -258,10 +254,8 @@ const char* estimate_snoring_risk(float intensity, int class_id) {
         return intensity > 0.3 ? "medium" : "low";
     } else if (class_id == HEAVY_SNORING) {
         return "high";
-    } else if (class_id == SNORING_START) {
-        return "medium";
-    } else {  // SNORING_END
-        return "low";
+    } else {
+        return "unknown";
     }
 }
 

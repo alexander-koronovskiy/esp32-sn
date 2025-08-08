@@ -29,7 +29,7 @@ def create_synthetic_snoring_data(duration_minutes=10, sampling_rate=8000, n_seg
     labels = []
     
     # Классы храпа с реалистичным распределением
-    snoring_classes = ['No_Snoring', 'Light_Snoring', 'Heavy_Snoring', 'Snoring_Start', 'Snoring_End']
+    snoring_classes = ['No_Snoring', 'Light_Snoring', 'Heavy_Snoring']
     
     for i in range(n_segments):
         # Создаем сегмент
@@ -47,27 +47,13 @@ def create_synthetic_snoring_data(duration_minutes=10, sampling_rate=8000, n_seg
             signal = (np.sin(2 * np.pi * 50 * t) * 0.25 +
                      np.sin(2 * np.pi * 100 * t) * 0.15 +
                      np.random.randn(segment_length) * 0.1)
-        elif i < n_segments * 0.80:  # 15% - сильный храп
+        else:  # 35% - сильный храп
             class_idx = 2
             # Сильный храп (широкополосный)
             signal = (np.sin(2 * np.pi * 80 * t) * 0.4 +
                      np.sin(2 * np.pi * 150 * t) * 0.3 +
                      np.sin(2 * np.pi * 300 * t) * 0.2 +
                      np.random.randn(segment_length) * 0.15)
-        elif i < n_segments * 0.90:  # 10% - начало храпа
-            class_idx = 3
-            # Начало храпа (нарастающий)
-            ramp = np.linspace(0, 1, segment_length)
-            signal = (np.sin(2 * np.pi * 60 * t) * 0.3 * ramp +
-                     np.sin(2 * np.pi * 120 * t) * 0.2 * ramp +
-                     np.random.randn(segment_length) * 0.1)
-        else:  # 10% - конец храпа
-            class_idx = 4
-            # Конец храпа (затухающий)
-            ramp = np.linspace(1, 0, segment_length)
-            signal = (np.sin(2 * np.pi * 70 * t) * 0.25 * ramp +
-                     np.sin(2 * np.pi * 140 * t) * 0.15 * ramp +
-                     np.random.randn(segment_length) * 0.05)
         
         segments.append(signal)
         labels.append(class_idx)
@@ -89,8 +75,8 @@ def create_comprehensive_visualization(segments, labels, predictions, features_d
     sns.set_palette("husl")
     
     # Цвета для классов храпа
-    class_names = ['No_Snoring', 'Light_Snoring', 'Heavy_Snoring', 'Snoring_Start', 'Snoring_End']
-    colors = ['#2E8B57', '#FFD700', '#FF4500', '#FF69B4', '#9370DB']
+    class_names = ['No_Snoring', 'Light_Snoring', 'Heavy_Snoring']
+    colors = ['#2E8B57', '#FFD700', '#FF4500']
     
     # 1. Временной ряд аудио с метками храпа
     fig, axes = plt.subplots(3, 1, figsize=(16, 12), height_ratios=[3, 1, 1])
@@ -328,7 +314,7 @@ def create_html_report(test_metrics, config, selected_features, features_df):
     os.makedirs('results', exist_ok=True)
     
     # Подготавливаем данные для отчета
-    class_names = ['No_Snoring', 'Light_Snoring', 'Heavy_Snoring', 'Snoring_Start', 'Snoring_End']
+    class_names = ['No_Snoring', 'Light_Snoring', 'Heavy_Snoring']
     
     # Статистика по классам
     class_stats = []
@@ -650,7 +636,7 @@ def main():
         print(f"  Количество сегментов: {len(segments)}")
         print(f"  Размер сегмента: {segments[0].shape}")
         print(f"  Распределение классов:")
-        for i, class_name in enumerate(['No_Snoring', 'Light_Snoring', 'Heavy_Snoring', 'Snoring_Start', 'Snoring_End']):
+        for i, class_name in enumerate(['No_Snoring', 'Light_Snoring', 'Heavy_Snoring']):
             count = np.sum(labels == i)
             print(f"    {class_name}: {count}")
         
@@ -725,9 +711,9 @@ def main():
         train_metrics = classifier.train(X_train_scaled, y_train, selected_features)
         
         print(f"✓ Модель обучена:")
-        print(f"  Точность на обучающих данных: {train_metrics['train_accuracy']:.4f}")
+        print(f"  Точность на обучающих данных: {train_metrics['accuracy']:.4f}")
         print(f"  Кросс-валидация: {train_metrics['cv_mean']:.4f} ± {train_metrics['cv_std']:.4f}")
-        print(f"  Количество признаков: {train_metrics['feature_count']}")
+        print(f"  Количество признаков: {len(selected_features)}")
         
         # 7. Оценка модели
         print("\n7. Оценка модели")
@@ -773,7 +759,7 @@ def main():
         print(f"  Количество признаков: {len(selected_features)}")
         
         print(f"\nКлассы храпа:")
-        for i, class_name in enumerate(['No_Snoring', 'Light_Snoring', 'Heavy_Snoring', 'Snoring_Start', 'Snoring_End']):
+        for i, class_name in enumerate(['No_Snoring', 'Light_Snoring', 'Heavy_Snoring']):
             precision = test_metrics['classification_report'].get(class_name, {}).get('precision', 0)
             recall = test_metrics['classification_report'].get(class_name, {}).get('recall', 0)
             f1 = test_metrics['classification_report'].get(class_name, {}).get('f1-score', 0)

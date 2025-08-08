@@ -47,7 +47,7 @@ class SnoringClassifier:
         self.random_state = random_state
         self.model = None
         self.feature_names = []
-        self.class_names = ['No_Snoring', 'Snoring']  # Бинарная классификация
+        self.class_names = ['No_Snoring', 'Light_Snoring', 'Heavy_Snoring']  # 3-классная классификация
         
     def create_model(self) -> Any:
         """
@@ -287,6 +287,7 @@ class SnoringClassifier:
             'snoring_detection_accuracy': float(snoring_detection_accuracy),
             'classification_report': report,
             'confusion_matrix': conf_matrix.tolist(),
+            'predictions': y_pred.tolist(),
             'precision': float(report['weighted avg']['precision']),
             'recall': float(report['weighted avg']['recall']),
             'f1_score': float(report['weighted avg']['f1-score'])
