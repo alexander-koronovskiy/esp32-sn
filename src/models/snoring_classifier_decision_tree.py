@@ -44,9 +44,9 @@ class SnoringDecisionTreeClassifier:
         self.model = None
         self.scaler = None
         
-        # 3 класса согласно ТЗ
-        self.class_names = ['No_Snoring', 'Light_Snoring', 'Heavy_Snoring']
-        self.class_count = 3
+        # 2 класса согласно реальной разметке
+        self.class_names = ['No_Snoring', 'Snoring']  # W = No_Snoring, '' = Snoring
+        self.class_count = 2
         
         # Параметры постобработки
         self.postprocessing_config = {
@@ -423,7 +423,7 @@ def create_decision_tree_config() -> Dict[str, Any]:
         'criterion': 'gini',               # Критерий разделения
         'random_state': 42,
         'feature_count': 30,               # 30 признаков согласно ТЗ
-        'class_count': 3,                  # 3 класса
+        'class_count': 2,                  # 2 класса согласно реальной разметке
         'postprocessing': {
             'median_filter_window': 3,     # Медианный фильтр по 3 окнам
             'hysteresis_confirm': 3,       # Подтверждение храпа

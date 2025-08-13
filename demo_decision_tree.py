@@ -34,9 +34,9 @@ def create_synthetic_data(n_samples: int = 1000) -> Tuple[np.ndarray, np.ndarray
     # Генерируем 30 признаков
     X = np.random.randn(n_samples, 30)
     
-    # Создаем метки классов (3 класса)
-    # 0: No Snoring, 1: Light Snoring, 2: Heavy Snoring
-    y = np.random.choice([0, 1, 2], size=n_samples, p=[0.6, 0.3, 0.1])
+    # Создаем метки классов (2 класса)
+    # 0: No Snoring, 1: Snoring
+    y = np.random.choice([0, 1], size=n_samples, p=[0.6, 0.4])
     
     print(f"✅ Создано {n_samples} сэмплов с 30 признаками")
     print(f"📊 Распределение классов: {np.bincount(y)}")
@@ -256,7 +256,7 @@ def test_feature_extractor():
 
 if __name__ == "__main__":
     print("🚀 Запуск демонстрации Decision Tree классификатора храпа")
-    print("📋 Архитектура: 30 признаков, 3 класса, ограничения сложности")
+    print("📋 Архитектура: 30 признаков, 2 класса, ограничения сложности")
     
     # Тестируем экстрактор признаков
     test_feature_extractor()
