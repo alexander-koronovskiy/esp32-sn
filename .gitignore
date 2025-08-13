@@ -136,6 +136,18 @@ data/annotations/*
 !data/processed/.gitkeep
 !data/annotations/.gitkeep
 
+# Snoring data
+snoring_data/
+snoring_data/*
+*.wav
+*.mp3
+*.flac
+*.aac
+*.m4a
+snoring_audio/
+snoring_recordings/
+snoring_samples/
+
 models/*.pkl
 models/*.joblib
 results/*
