@@ -3,10 +3,10 @@
 
 📊 MODEL PERFORMANCE
 --------------------
-Accuracy:     0.9947
-Precision:    0.0000
-Recall:       0.0000
-F1-Score:     0.0000
+Accuracy:     0.9973
+Precision:    0.6667
+Recall:       1.0000
+F1-Score:     0.8000
 
 🔧 MODEL PARAMETERS
 --------------------

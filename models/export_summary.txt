@@ -1,0 +1,31 @@
+🎯 EXPORT SUMMARY: Snoring Classification Models
+==================================================
+
+📁 Exported Models:
+--------------------
+✅ Python Pickle: snoring_decision_tree.pkl
+✅ Keras H5: snoring_classifier_keras.h5
+✅ TFLite: snoring_classifier.tflite
+✅ ESP32 C Header: snoring_classifier_esp32.h
+✅ ESP32 C Implementation: snoring_classifier_esp32_impl.c
+
+🚀 Usage Instructions:
+--------------------
+1. Python (Pickle):
+   from models.decision_tree_classifier import SnoringDecisionTreeClassifier
+   classifier = SnoringDecisionTreeClassifier()
+   classifier.load_model('models/snoring_decision_tree.pkl')
+
+2. Keras:
+   import tensorflow as tf
+   model = tf.keras.models.load_model('models/snoring_classifier_keras.h5')
+
+3. TFLite:
+   import tensorflow as tf
+   interpreter = tf.lite.Interpreter(model_path='models/snoring_classifier.tflite')
+
+4. ESP32:
+   #include 'snoring_classifier_esp32.h'
+   // Use the C functions directly
+
+🎯 All models are ready for deployment!

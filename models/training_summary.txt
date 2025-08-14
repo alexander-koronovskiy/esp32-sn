@@ -9,7 +9,7 @@ Feature Count: 39
 Class Names: [0, 1]
 
 TEST METRICS:
-  accuracy: 0.9947
-  precision: 0.0000
-  recall: 0.0000
-  f1_score: 0.0000
+  accuracy: 0.9973
+  precision: 0.6667
+  recall: 1.0000
+  f1_score: 0.8000

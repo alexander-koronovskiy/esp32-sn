@@ -279,7 +279,7 @@ class SnoringFeatureExtractor:
             Tuple of (features_array, window_times)
         """
         # Load CSV data
-        data = pd.read_csv(csv_path)
+        data = pd.read_csv(csv_path, sep=';')
         
         # Parse start time from filename
         start_time = self.parse_time_from_filename(csv_path.name)

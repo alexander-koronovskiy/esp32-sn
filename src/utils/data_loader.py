@@ -201,7 +201,7 @@ class SnoringDataLoader:
             
             # Load CSV to get number of rows
             try:
-                data = pd.read_csv(csv_file)
+                data = pd.read_csv(csv_file, sep=';')
                 num_rows = len(data)
                 
                 timeline.append((csv_file, start_time, current_row))
@@ -272,7 +272,7 @@ class SnoringDataLoader:
         
         for csv_file, start_time, start_row in timeline:
             try:
-                data = pd.read_csv(csv_file)
+                data = pd.read_csv(csv_file, sep=';')
                 data['file_time'] = start_time
                 data['global_row'] = start_row + np.arange(len(data))
                 
