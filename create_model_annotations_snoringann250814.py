@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-Скрипт для тестирования новой модели по ТЗ с генерацией файлов model_*_ann.txt
-Использует обученную модель: max_depth=5, min_samples_leaf=10, criterion=gini, class_weight=balanced
-Создает файлы с префиксом model_ (новая модель по ТЗ)
+Скрипт для создания разметки с префиксом model_ для данных из папки SnoringAnn250814
+Использует обученную модель по ТЗ: max_depth=5, min_samples_leaf=10, criterion=gini, class_weight=balanced
 """
 
 import os
@@ -12,15 +11,14 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from datetime import datetime, timedelta
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 # Импорты из нашего проекта
 from src.features.feature_extractor import SnoringFeatureExtractor
 from src.utils.data_loader import SnoringDataLoader
 
 
-class TZCompliantModelTester:
-    """Класс для тестирования новой модели по ТЗ"""
+class SnoringAnn250814ModelAnnotator:
+    """Класс для создания разметки с префиксом model_ для SnoringAnn250814"""
     
     def __init__(self, models_dir="models"):
         self.models_dir = Path(models_dir)
@@ -29,9 +27,9 @@ class TZCompliantModelTester:
         self.feature_names = None
         self.results = {}
         
-    def load_new_model(self):
-        """Загружает новую модель по ТЗ"""
-        print("🔄 Загружаю новую модель по ТЗ...")
+    def load_model(self):
+        """Загружает модель по ТЗ"""
+        print("🔄 Загружаю модель по ТЗ...")
         
         # Загружаем модель
         model_path = self.models_dir / "improved_39_features_tz_compliant" / "snoring_classifier_tz_compliant.pkl"
@@ -63,45 +61,38 @@ class TZCompliantModelTester:
         else:
             raise FileNotFoundError(f"Файл названий признаков не найден: {feature_names_path}")
         
-        # Проверяем гиперпараметры модели
-        print(f"📋 Гиперпараметры модели:")
-        print(f"  max_depth: {self.model.max_depth}")
-        print(f"  min_samples_leaf: {self.model.min_samples_leaf}")
-        print(f"  criterion: {self.model.criterion}")
-        print(f"  class_weight: {self.model.class_weight}")
-        
         return True
     
-    def find_snoring_data_folders(self):
-        """Находит все подпапки в snoring_data"""
-        snoring_data_dir = Path("snoring_data")
-        if not snoring_data_dir.exists():
-            raise FileNotFoundError("Папка snoring_data не найдена")
+    def find_snoringann250814_folders(self):
+        """Находит все подпапки в SnoringAnn250814"""
+        snoringann_dir = Path("SnoringAnn250814")
+        if not snoringann_dir.exists():
+            raise FileNotFoundError("Папка SnoringAnn250814 не найдена")
         
         folders = []
-        for item in snoring_data_dir.iterdir():
+        for item in snoringann_dir.iterdir():
             if item.is_dir() and not item.name.startswith('.'):
                 for subitem in item.iterdir():
                     if subitem.is_dir() and not subitem.name.startswith('.'):
                         folders.append(subitem)
         
-        print(f"📁 Найдено папок для тестирования: {len(folders)}")
+        print(f"📁 Найдено папок в SnoringAnn250814: {len(folders)}")
         return folders
     
-    def test_single_folder(self, folder_path):
-        """Тестирует новую модель на одной папке"""
+    def process_single_folder(self, folder_path):
+        """Обрабатывает одну папку и создает разметку с префиксом model_"""
         folder_name = folder_path.name
-        print(f"\n🔍 Тестирую папку: {folder_name}")
+        print(f"\n🔍 Обрабатываю папку: {folder_name}")
         
         try:
-            # Ищем оригинальный файл аннотаций (без префикса model_)
+            # Ищем оригинальный файл аннотаций
             ann_files = [f for f in folder_path.glob("*_ann.txt") if not f.name.startswith('model_')]
             if not ann_files:
-                print(f"⚠️ Оригинальный файл аннотаций не найден в {folder_name}")
+                print(f"⚠️ Файл аннотаций не найден в {folder_name}")
                 return None
             
             ann_file = ann_files[0]
-            print(f"📄 Файл аннотаций (оригинал): {ann_file.name}")
+            print(f"📄 Файл аннотаций: {ann_file.name}")
             
             # Ищем CSV файлы
             csv_files = list(folder_path.glob("*.csv"))
@@ -144,64 +135,48 @@ class TZCompliantModelTester:
             # Нормализуем признаки
             X_scaled = self.scaler.transform(X)
             
-            # Делаем предсказания новой моделью
+            # Делаем предсказания моделью
             predictions = self.model.predict(X_scaled)
-            prediction_proba = self.model.predict_proba(X_scaled)
             
             print(f"🎯 Сделано предсказаний: {len(predictions)}")
             print(f"📊 Распределение предсказаний: {np.bincount(predictions)}")
             
-            # Получаем оригинальные метки
-            labels = data_loader.get_labels_for_windows(all_window_times)
-            if labels is None:
-                print(f"⚠️ Не удалось получить метки для {folder_name}")
-                return None
-            
-            labels = np.array(labels)
-            print(f"🏷️ Распределение меток: {np.bincount(labels)}")
-            
-            # Вычисляем метрики
-            accuracy = accuracy_score(labels, predictions)
-            precision = precision_score(labels, predictions, zero_division=0)
-            recall = recall_score(labels, predictions, zero_division=0)
-            f1 = f1_score(labels, predictions, zero_division=0)
-            
-            print(f"📈 Точность: {accuracy:.4f}")
-            print(f"📈 Точность (precision): {precision:.4f}")
-            print(f"📈 Полнота (recall): {recall:.4f}")
-            print(f"📈 F1-score: {f1:.4f}")
-            
-            # Создаем файл с предсказаниями новой модели
-            self.create_model_annotations(folder_path, ann_file, all_window_times, predictions, "new_tz_compliant")
+            # Создаем файл с предсказаниями модели
+            self.create_model_annotations(folder_path, ann_file, all_window_times, predictions)
             
             # Возвращаем результаты
             return {
                 'folder': folder_name,
                 'total_windows': len(predictions),
-                'accuracy': accuracy,
-                'precision': precision,
-                'recall': recall,
-                'f1_score': f1,
                 'predictions_distribution': np.bincount(predictions).tolist(),
-                'labels_distribution': np.bincount(labels).tolist()
+                'snoring_periods': self.count_snoring_periods(all_window_times, predictions)
             }
             
         except Exception as e:
-            print(f"❌ Ошибка при тестировании {folder_name}: {e}")
+            print(f"❌ Ошибка при обработке {folder_name}: {e}")
             return None
     
-    def create_model_annotations(self, folder_path, original_ann_file, window_times, predictions, model_type):
-        """Создает файл аннотаций с предсказаниями новой модели"""
+    def count_snoring_periods(self, window_times, predictions):
+        """Подсчитывает количество периодов с храпом (8 секунд каждый)"""
+        snoring_periods = 0
+        
+        for window_time, pred in zip(window_times, predictions):
+            if pred == 1:  # Snoring
+                snoring_periods += 1
+        
+        return snoring_periods
+    
+    def create_model_annotations(self, folder_path, original_ann_file, window_times, predictions):
+        """Создает файл аннотаций с предсказаниями модели"""
         try:
             # Получаем базовое имя файла аннотаций
             ann_name = original_ann_file.stem  # без расширения
             
-            # Всегда создаем с префиксом model_ (новая модель по ТЗ)
+            # Создаем с префиксом model_
             model_ann_name = f"model_{ann_name}.txt"
-                
             model_ann_path = folder_path / model_ann_name
             
-            print(f"📝 Создаю файл предсказаний новой модели: {model_ann_name}")
+            print(f"📝 Создаю файл разметки модели: {model_ann_name}")
             
             # Каждое предсказание = период 8 секунд (скользящее окно 8с с шагом 1с)
             snoring_periods = []
@@ -221,66 +196,60 @@ class TZCompliantModelTester:
                     end_str = end_time.strftime("%H:%M:%S.%f")[:-3]
                     f.write(f"W,{start_str},{end_str}\n")
             
-            print(f"✅ Файл предсказаний новой модели создан: {model_ann_name}")
+            print(f"✅ Файл разметки модели создан: {model_ann_name}")
             print(f"📊 Найдено периодов с храпом: {len(snoring_periods)}")
             
         except Exception as e:
-            print(f"❌ Ошибка при создании файла предсказаний: {e}")
+            print(f"❌ Ошибка при создании файла разметки: {e}")
     
-    def run_tests(self):
-        """Запускает тестирование новой модели на всех папках"""
-        print("🚀 Начинаю тестирование новой модели по ТЗ на всех данных...")
+    def run_annotation(self):
+        """Запускает создание разметки для всех папок"""
+        print("🚀 Начинаю создание разметки с префиксом model_ для SnoringAnn250814...")
         
-        # Загружаем новую модель
-        self.load_new_model()
+        # Загружаем модель
+        self.load_model()
         
-        # Находим папки для тестирования
-        folders = self.find_snoring_data_folders()
+        # Находим папки для обработки
+        folders = self.find_snoringann250814_folders()
         
-        # Тестируем каждую папку
+        # Обрабатываем каждую папку
         for folder in folders:
-            result = self.test_single_folder(folder)
+            result = self.process_single_folder(folder)
             if result:
                 self.results[folder.name] = result
         
         # Создаем общий отчет
         self.create_summary_report()
         
-        print(f"\n🎉 Тестирование новой модели по ТЗ завершено! Обработано папок: {len(self.results)}")
+        print(f"\n🎉 Создание разметки завершено! Обработано папок: {len(self.results)}")
     
     def create_summary_report(self):
-        """Создает общий отчет по тестированию новой модели"""
+        """Создает общий отчет по созданию разметки"""
         if not self.results:
             print("⚠️ Нет результатов для отчета")
             return
         
-        report_path = Path("results") / "tz_compliant_model_testing_report.txt"
+        report_path = Path("results") / "snoringann250814_model_annotation_report.txt"
         report_path.parent.mkdir(exist_ok=True)
         
         print(f"\n📊 Создаю общий отчет: {report_path}")
         
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write("=" * 80 + "\n")
-            f.write("ОТЧЕТ О ТЕСТИРОВАНИИ НОВОЙ МОДЕЛИ ПО ТЗ\n")
+            f.write("ОТЧЕТ О СОЗДАНИИ РАЗМЕТКИ С ПРЕФИКСОМ MODEL_ ДЛЯ SNORINGANN250814\n")
             f.write("=" * 80 + "\n\n")
-            f.write(f"Дата тестирования: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-            f.write(f"Всего протестировано папок: {len(self.results)}\n")
+            f.write(f"Дата создания: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"Всего обработано папок: {len(self.results)}\n")
             f.write(f"Модель: max_depth=5, min_samples_leaf=10, criterion=gini, class_weight=balanced\n\n")
             
             # Общая статистика
             total_windows = sum(r['total_windows'] for r in self.results.values())
-            avg_accuracy = np.mean([r['accuracy'] for r in self.results.values()])
-            avg_precision = np.mean([r['precision'] for r in self.results.values()])
-            avg_recall = np.mean([r['recall'] for r in self.results.values()])
-            avg_f1 = np.mean([r['f1_score'] for r in self.results.values()])
+            total_snoring_periods = sum(r['snoring_periods'] for r in self.results.values())
             
-            f.write("ОБЩАЯ СТАТИСТИКА НОВОЙ МОДЕЛИ ПО ТЗ:\n")
+            f.write("ОБЩАЯ СТАТИСТИКА:\n")
             f.write("-" * 50 + "\n")
             f.write(f"Общее количество окон: {total_windows}\n")
-            f.write(f"Средняя точность: {avg_accuracy:.4f}\n")
-            f.write(f"Средняя точность (precision): {avg_precision:.4f}\n")
-            f.write(f"Средняя полнота (recall): {avg_recall:.4f}\n")
-            f.write(f"Средний F1-score: {avg_f1:.4f}\n\n")
+            f.write(f"Общее количество периодов с храпом: {total_snoring_periods}\n\n")
             
             # Детальные результаты по папкам
             f.write("ДЕТАЛЬНЫЕ РЕЗУЛЬТАТЫ ПО ПАПКАМ:\n")
@@ -289,15 +258,11 @@ class TZCompliantModelTester:
             for folder_name, result in self.results.items():
                 f.write(f"\nПапка: {folder_name}\n")
                 f.write(f"  Окон: {result['total_windows']}\n")
-                f.write(f"  Точность: {result['accuracy']:.4f}\n")
-                f.write(f"  Precision: {result['precision']:.4f}\n")
-                f.write(f"  Recall: {result['recall']:.4f}\n")
-                f.write(f"  F1-score: {result['f1_score']:.4f}\n")
+                f.write(f"  Периодов с храпом: {result['snoring_periods']}\n")
                 f.write(f"  Распределение предсказаний: {result['predictions_distribution']}\n")
-                f.write(f"  Распределение меток: {result['labels_distribution']}\n")
             
             # Сохраняем результаты в JSON
-            json_path = Path("results") / "tz_compliant_model_testing_results.json"
+            json_path = Path("results") / "snoringann250814_model_annotation_results.json"
             with open(json_path, 'w', encoding='utf-8') as json_f:
                 json.dump(self.results, json_f, indent=2, default=str)
             
@@ -309,8 +274,8 @@ class TZCompliantModelTester:
 def main():
     """Основная функция"""
     try:
-        tester = TZCompliantModelTester()
-        tester.run_tests()
+        annotator = SnoringAnn250814ModelAnnotator()
+        annotator.run_annotation()
     except Exception as e:
         print(f"❌ Критическая ошибка: {e}")
         import traceback

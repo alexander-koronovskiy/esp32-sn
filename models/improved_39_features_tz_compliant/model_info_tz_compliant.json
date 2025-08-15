@@ -1,0 +1,76 @@
+{
+  "model_name": "Snoring Classifier TZ Compliant",
+  "version": "1.0",
+  "export_date": "2025-08-15T18:03:44.527824",
+  "original_model": {
+    "type": "DecisionTreeClassifier",
+    "hyperparameters": {
+      "max_depth": 5,
+      "min_samples_leaf": 10,
+      "criterion": "gini",
+      "class_weight": "balanced"
+    }
+  },
+  "exported_formats": {
+    "keras_model": {
+      "path": "models/improved_39_features_tz_compliant/snoring_classifier_tz_compliant.h5",
+      "size_kb": 99.71875,
+      "format": "HDF5 (.h5)"
+    },
+    "tflite_model": {
+      "path": "models/improved_39_features_tz_compliant/snoring_classifier_tz_compliant.tflite",
+      "size_kb": 22.76953125,
+      "format": "TensorFlow Lite (.tflite)"
+    }
+  },
+  "feature_info": {
+    "total_features": 39,
+    "feature_names": [
+      "b100_mean",
+      "b100_max",
+      "b100_std",
+      "b100_relative_std",
+      "b100_high_threshold_ratio",
+      "b100_trend",
+      "b100_regularity",
+      "b400_mean",
+      "b400_max",
+      "b400_std",
+      "b400_relative_std",
+      "b400_high_threshold_ratio",
+      "b400_trend",
+      "b400_regularity",
+      "b1000_mean",
+      "b1000_max",
+      "b1000_std",
+      "b1000_relative_std",
+      "b1000_high_threshold_ratio",
+      "b1000_trend",
+      "b1000_regularity",
+      "env_mean",
+      "env_max",
+      "env_std",
+      "env_relative_std",
+      "env_high_threshold_ratio",
+      "env_trend",
+      "env_regularity",
+      "accel_x_mean_activity",
+      "accel_x_max_activity",
+      "accel_x_movement_ratio",
+      "accel_y_mean_activity",
+      "accel_y_max_activity",
+      "accel_y_movement_ratio",
+      "accel_z_mean_activity",
+      "accel_z_max_activity",
+      "accel_z_movement_ratio",
+      "b400_b100_ratio",
+      "b400_b1000_ratio"
+    ]
+  },
+  "usage_notes": [
+    "Модель обучена на 39 улучшенных признаках",
+    "Использует сбалансированные веса классов",
+    "Оптимизирована для ESP32 и подобных устройств",
+    "Требует предварительной нормализации признаков"
+  ]
+}
