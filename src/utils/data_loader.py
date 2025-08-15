@@ -56,6 +56,9 @@ class SnoringDataLoader:
         Returns:
             List of (label, start_time, end_time) tuples
         """
+        # Set annotation_file first
+        self.annotation_file = ann_file
+        
         annotations = []
         
         with open(ann_file, 'r') as f:
@@ -69,21 +72,27 @@ class SnoringDataLoader:
                         end_time_str = parts[2].strip()
                         
                         try:
-                            start_time = self.parse_time_string(start_time_str)
-                            end_time = self.parse_time_string(end_time_str)
+                            start_time = self.parse_time_string(start_time_str, ann_file)
+                            end_time = self.parse_time_string(end_time_str, ann_file, start_time)
                             
                             annotations.append((label, start_time, end_time))
                         except ValueError as e:
                             print(f"Warning: Could not parse time in line: {line}, error: {e}")
         
+        # Save annotations to self.annotations for later use
+        self.annotations = annotations
+        print(f"   📊 Loaded {len(annotations)} annotations")
+        
         return annotations
     
-    def parse_time_string(self, time_str: str) -> datetime:
+    def parse_time_string(self, time_str: str, annotation_file: Path = None, reference_time: datetime = None) -> datetime:
         """
         Parse time string in format HH:MM:SS.mmm
         
         Args:
             time_str: Time string
+            annotation_file: Annotation file path for getting base date
+            reference_time: Reference time for handling midnight crossing
             
         Returns:
             datetime object
@@ -105,43 +114,107 @@ class SnoringDataLoader:
         minute = int(time_parts[1])
         second = int(time_parts[2])
         
-        # Get date from annotation file parent folder name
-        if self.annotation_file:
-            parent_folder = self.annotation_file.parent.name
-            date_match = re.search(r'(\d{6})_', parent_folder)
+        # Get base date from annotation file folder name
+        if annotation_file:
+            parent_folder = annotation_file.parent.name
+            # Try different date formats
+            date_match = None
             
+            # Format 1: '250812_234316887' -> '250812'
+            date_match = re.search(r'(\d{6})_', parent_folder)
             if date_match:
                 date_str = date_match.group(1)
                 day = int(date_str[:2])
                 month = int(date_str[2:4])
                 year = 2000 + int(date_str[4:6])  # Assume 20xx
-            else:
-                # Fallback to today
-                today = datetime.now().date()
-                day, month, year = today.day, today.month, today.year
+                base_date = datetime(year, month, day).date()
+                print(f"   📅 Using base date from folder '{parent_folder}' (format 1): {base_date}")
+                
+                # Create datetime
+                dt = datetime.combine(base_date, datetime.min.time().replace(
+                    hour=hour, minute=minute, second=second, microsecond=milliseconds * 1000
+                ))
+                
+                # Handle midnight crossing for end times
+                if reference_time and hour < 12 and reference_time.hour >= 12:
+                    # If this is an end time (early morning) and reference is late night, add one day
+                    dt += timedelta(days=1)
+                    print(f"   🌙 Midnight crossing detected, adjusted to next day: {dt}")
+                
+                return dt
+            
+            # Format 2: '4_2025_08_12_23.43' -> '2025_08_12'
+            date_match = re.search(r'(\d{4})_(\d{2})_(\d{2})', parent_folder)
+            if date_match:
+                year = int(date_match.group(1))
+                month = int(date_match.group(2))
+                day = int(date_match.group(3))
+                base_date = datetime(year, month, day).date()
+                print(f"   📅 Using base date from folder '{parent_folder}' (format 2): {base_date}")
+                
+                # Create datetime
+                dt = datetime.combine(base_date, datetime.min.time().replace(
+                    hour=hour, minute=minute, second=second, microsecond=milliseconds * 1000
+                ))
+                
+                # Handle midnight crossing for end times
+                if reference_time and hour < 12 and reference_time.hour >= 12:
+                    # If this is an end time (early morning) and reference is late night, add one day
+                    dt += timedelta(days=1)
+                    print(f"   🌙 Midnight crossing detected, adjusted to next day: {dt}")
+                
+                return dt
+            
+            # Format 3: '2025-08-12' -> '2025-08-12'
+            date_match = re.search(r'(\d{4})-(\d{2})-(\d{2})', parent_folder)
+            if date_match:
+                year = int(date_match.group(1))
+                month = int(date_match.group(2))
+                day = int(date_match.group(3))
+                base_date = datetime(year, month, day).date()
+                print(f"   📅 Using base date from folder '{parent_folder}' (format 3): {base_date}")
+                
+                # Create datetime
+                dt = datetime.combine(base_date, datetime.min.time().replace(
+                    hour=hour, minute=minute, second=second, microsecond=milliseconds * 1000
+                ))
+                
+                # Handle midnight crossing for end times
+                if reference_time and hour < 12 and reference_time.hour >= 12:
+                    # If this is an end time (early morning) and reference is late night, add one day
+                    dt += timedelta(days=1)
+                    print(f"   🌙 Midnight crossing detected, adjusted to next day: {dt}")
+                
+                return dt
+            
+            print(f"   ⚠️  Could not parse date from folder '{parent_folder}', using today")
         else:
-            # Fallback to today
-            today = datetime.now().date()
-            day, month, year = today.day, today.month, today.year
+            print(f"   ⚠️  No annotation file, using today")
         
-        dt = datetime(year, month, day, hour, minute, second, microsecond=milliseconds * 1000)
-        
-        return dt
+        # Fallback to today
+        today = datetime.now().date()
+        print(f"   ⚠️  Using fallback date: {today}")
+        return datetime.combine(today, datetime.min.time().replace(
+            hour=hour, minute=minute, second=second, microsecond=milliseconds * 1000
+        ))
     
-    def parse_time_from_filename(self, filename: str) -> datetime:
+    def parse_time_from_filename(self, filename) -> datetime:
         """
         Parse time from CSV filename
         
         Args:
-            filename: CSV filename (e.g., '3_100917.csv')
+            filename: CSV filename (e.g., '3_100917.csv') or Path object
             
         Returns:
             datetime object
         """
+        # Convert Path to string if needed
+        filename_str = str(filename)
+        
         # Extract time part (e.g., '100917' from '3_100917.csv')
-        match = re.search(r'_(\d{6})\.csv$', filename)
+        match = re.search(r'_(\d{6})\.csv$', filename_str)
         if not match:
-            raise ValueError(f"Cannot parse time from filename: {filename}")
+            raise ValueError(f"Cannot parse time from filename: {filename_str}")
         
         time_str = match.group(1)
         
@@ -150,21 +223,13 @@ class SnoringDataLoader:
         minute = int(time_str[2:4])
         second = int(time_str[4:6])
         
-        # Get date from parent folder name (e.g., '250811_100813903' -> '250811')
-        parent_folder = Path(filename).parent.name
-        date_match = re.search(r'(\d{6})_', parent_folder)
+        # Get base date from folder
+        base_date = self.get_base_date_from_folder()
         
-        if date_match:
-            date_str = date_match.group(1)
-            day = int(date_str[:2])
-            month = int(date_str[2:4])
-            year = 2000 + int(date_str[4:6])  # Assume 20xx
-        else:
-            # Fallback to today
-            today = datetime.now().date()
-            day, month, year = today.day, today.month, today.year
+        # Create datetime
+        dt = datetime(base_date.year, base_date.month, base_date.day, hour, minute, second)
         
-        return datetime(year, month, day, hour, minute, second)
+        return dt
     
     def get_csv_files_sorted(self) -> List[Path]:
         """
@@ -179,7 +244,15 @@ class SnoringDataLoader:
         csv_files = [f for f in csv_files if 'settings.csv' not in f.name]
         
         # Sort by time parsed from filename
-        csv_files.sort(key=lambda x: self.parse_time_from_filename(x.name))
+        # Handle midnight crossing: evening files (23:xx) should come before morning files (00:xx)
+        def sort_key(filename):
+            dt = self.parse_time_from_filename(filename.name)
+            # If hour is 23 (evening), subtract 24 hours to make it come before 00 (morning)
+            if dt.hour == 23:
+                dt = dt - timedelta(hours=24)
+            return dt
+        
+        csv_files.sort(key=sort_key)
         
         return csv_files
     
@@ -196,7 +269,7 @@ class SnoringDataLoader:
         timeline = []
         current_row = 0
         
-        for csv_file in csv_files:
+        for i, csv_file in enumerate(csv_files):
             start_time = self.parse_time_from_filename(csv_file.name)
             
             # Load CSV to get number of rows
@@ -205,6 +278,21 @@ class SnoringDataLoader:
                 num_rows = len(data)
                 
                 timeline.append((csv_file, start_time, current_row))
+                
+                # Calculate next start row (continuous timeline)
+                if i < len(csv_files) - 1:
+                    # Check if next file is consecutive
+                    next_file = csv_files[i + 1]
+                    next_start_time = self.parse_time_from_filename(next_file.name)
+                    
+                    # If there's a gap, adjust the timeline
+                    time_diff = (next_start_time - start_time).total_seconds()
+                    expected_rows = int(time_diff * 10)  # 10 measurements per second
+                    
+                    if abs(expected_rows - num_rows) > 5:  # Allow small tolerance
+                        print(f"   ⚠️  Time gap detected between {csv_file.name} and {next_file.name}")
+                        print(f"      Expected: {expected_rows} rows, got: {num_rows} rows")
+                
                 current_row += num_rows
                 
             except Exception as e:
@@ -223,6 +311,17 @@ class SnoringDataLoader:
         Returns:
             List of labels (1 for snoring, 0 for no snoring)
         """
+        # Load annotations if not already loaded
+        if not hasattr(self, 'annotations') or self.annotations is None:
+            if not hasattr(self, 'annotation_file') or self.annotation_file is None:
+                self.annotation_file = self.find_annotation_file()
+            if self.annotation_file:
+                self.annotations = self.parse_annotations(self.annotation_file)
+                print(f"   📊 Loaded {len(self.annotations)} annotations for labeling")
+            else:
+                print(f"   ⚠️  No annotation file found, all labels will be 0")
+                return [0] * len(window_times)
+        
         labels = []
         
         for window_time in window_times:
@@ -329,3 +428,59 @@ class SnoringDataLoader:
         feature_names = extractor.get_feature_names()
         
         return features_array, labels_array, feature_names 
+
+    def get_base_date_from_folder(self) -> datetime.date:
+        """
+        Get base date from annotation file folder name
+        
+        Returns:
+            Base date for all time calculations
+        """
+        # Set annotation_file if not already set
+        if not hasattr(self, 'annotation_file') or self.annotation_file is None:
+            self.annotation_file = self.find_annotation_file()
+        
+        if self.annotation_file:
+            parent_folder = self.annotation_file.parent.name
+            # Try different date formats
+            date_match = None
+            
+            # Format 1: '250812_234316887' -> '250812'
+            date_match = re.search(r'(\d{6})_', parent_folder)
+            if date_match:
+                date_str = date_match.group(1)
+                day = int(date_str[:2])
+                month = int(date_str[2:4])
+                year = 2000 + int(date_str[4:6])  # Assume 20xx
+                base_date = datetime(year, month, day).date()
+                print(f"   📅 Using base date from folder '{parent_folder}' (format 1): {base_date}")
+                return base_date
+            
+            # Format 2: '4_2025_08_12_23.43' -> '2025_08_12'
+            date_match = re.search(r'(\d{4})_(\d{2})_(\d{2})', parent_folder)
+            if date_match:
+                year = int(date_match.group(1))
+                month = int(date_match.group(2))
+                day = int(date_match.group(3))
+                base_date = datetime(year, month, day).date()
+                print(f"   📅 Using base date from folder '{parent_folder}' (format 2): {base_date}")
+                return base_date
+            
+            # Format 3: '2025-08-12' -> '2025-08-12'
+            date_match = re.search(r'(\d{4})-(\d{2})-(\d{2})', parent_folder)
+            if date_match:
+                year = int(date_match.group(1))
+                month = int(date_match.group(2))
+                day = int(date_match.group(3))
+                base_date = datetime(year, month, day).date()
+                print(f"   📅 Using base date from folder '{parent_folder}' (format 3): {base_date}")
+                return base_date
+            
+            print(f"   ⚠️  Could not parse date from folder '{parent_folder}', using today")
+        else:
+            print(f"   ⚠️  No annotation file, using today")
+        
+        # Fallback to today
+        today = datetime.now().date()
+        print(f"   ⚠️  Using fallback date: {today}")
+        return today 

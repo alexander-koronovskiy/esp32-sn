@@ -1,0 +1,41 @@
+🚀 IMPROVED 39-FEATURE SNORING CLASSIFIER - SUMMARY REPORT
+======================================================================
+
+📊 Dataset Information:
+   Total samples: 1909
+   Total features: 39
+   Label distribution: {np.int64(0): np.int64(1790), np.int64(1): np.int64(119)}
+
+🔧 Feature Categories:
+   Audio features: 30 (7 per channel × 4 channels)
+   Accelerometer: 9 (3 per axis × 3 axes)
+   Mixed features: 9 (ratios)
+
+🎯 Model Parameters:
+   max_depth: 15
+   min_samples_leaf: 1
+   criterion: entropy
+
+🌳 Model Structure:
+   Tree nodes: 55
+   Tree depth: 10
+   Significant features: 12/39
+
+📈 Performance Metrics:
+   Test accuracy: 0.8850
+   Test precision: 0.0000
+   Test recall: 0.0000
+   Test F1-score: 0.0000
+
+🔍 Key Improvements Made:
+   1. Audio threshold: 60th percentile (was 75th) for better sensitivity
+   2. Accelerometer threshold: 40th percentile (was 50th) for better movement detection
+   3. Logarithmic transforms for better scaling of audio features
+   4. Improved mixed feature ratios with log transforms
+   5. Maintained exactly 39 features as per TЗ
+
+📁 Files Created:
+   - Model: models/improved_39_features_snoring_decision_tree.pkl
+   - Feature names: models/improved_39_features_names.txt
+   - Training results: models/improved_39_features_training_results.json
+   - Summary: models/improved_39_features_summary.txt

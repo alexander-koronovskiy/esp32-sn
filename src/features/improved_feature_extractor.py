@@ -1,6 +1,6 @@
 """
-Feature Extractor for Snoring Classification
-Extracts 39 features from 8-second sliding windows
+Improved Feature Extractor for Snoring Classification
+Extracts 55 features from 8-second sliding windows with better audio features
 """
 
 import numpy as np
@@ -11,17 +11,17 @@ import re
 from datetime import datetime, timedelta
 
 
-class SnoringFeatureExtractor:
+class ImprovedSnoringFeatureExtractor:
     """
-    Extracts 39 improved features from sliding windows of sensor data
-    - 28 audio features (7 per channel × 4 channels) with improved thresholds and log transforms
-    - 9 accelerometer features (3 per axis × 3 axes) with better movement detection
-    - 2 mixed features (logarithmic ratios)
+    Extracts 55 features from sliding windows of sensor data
+    - 44 audio features (11 per channel × 4 channels)
+    - 9 accelerometer features (3 per axis × 3 axes)
+    - 2 mixed features (ratios)
     """
     
     def __init__(self, window_size: int = 8, step_size: int = 1, sampling_rate: int = 10):
         """
-        Initialize feature extractor
+        Initialize improved feature extractor
         
         Args:
             window_size: Window size in seconds (default: 8)
@@ -39,13 +39,12 @@ class SnoringFeatureExtractor:
         # Accelerometer axes
         self.accel_axes = ['x', 'y', 'z']
         
-    def parse_time_from_filename(self, filename: str, base_date: datetime.date = None) -> datetime:
+    def parse_time_from_filename(self, filename: str) -> datetime:
         """
         Parse time from CSV filename
         
         Args:
             filename: CSV filename (e.g., '3_100917.csv')
-            base_date: Base date to use (if None, uses today)
             
         Returns:
             datetime object
@@ -62,15 +61,9 @@ class SnoringFeatureExtractor:
         minute = int(time_str[2:4])
         second = int(time_str[4:6])
         
-        # Use provided base_date or fallback to today
-        if base_date is None:
-            base_date = datetime.now().date()
-        
-        # Ensure base_date is a date object
-        if isinstance(base_date, datetime):
-            base_date = base_date.date()
-        
-        return datetime.combine(base_date, datetime.min.time().replace(
+        # Assume date is today (or from parent folder name)
+        today = datetime.now().date()
+        return datetime.combine(today, datetime.min.time().replace(
             hour=hour, minute=minute, second=second
         ))
     
@@ -106,19 +99,20 @@ class SnoringFeatureExtractor:
     
     def extract_audio_features(self, audio_data: np.ndarray) -> Dict[str, float]:
         """
-        Extract 7 improved features for one audio channel
+        Extract 11 improved features for one audio channel
         
         Args:
             audio_data: Array of audio values for one channel
             
         Returns:
-            Dictionary with 7 improved features
+            Dictionary with 11 features
         """
         if len(audio_data) == 0:
             return {
                 'mean': 0.0, 'max': 0.0, 'std': 0.0,
-                'relative_std': 0.0, 'high_threshold_ratio': 0.0,
-                'trend': 0.0, 'regularity': 0.0
+                'relative_std': 0.0, 'low_threshold_ratio': 0.0,
+                'high_spike_ratio': 0.0, 'trend': 0.0, 'regularity': 0.0,
+                'log_mean': 0.0, 'log_std': 0.0, 'log_max': 0.0
             }
         
         # Basic statistics
@@ -142,19 +136,22 @@ class SnoringFeatureExtractor:
         # 4. Относительная изменчивость
         relative_std = std_dev / mean_level
         
-        # 5. Доля высоких значений (выше 60-го перцентиля) - УЛУЧШЕННЫЙ ПОРОГ
-        # Вместо 75-го используем 60-й для лучшей чувствительности
-        threshold = np.percentile(audio_data, 60)
-        high_threshold_ratio = np.mean(audio_data > threshold)
+        # 5. Доля низких значений (ниже 25-го перцентиля) - НИЗКИЙ ПОРОГ
+        low_threshold = np.percentile(audio_data, 25)
+        low_threshold_ratio = np.mean(audio_data < low_threshold)
         
-        # 6. Тенденция изменения (линейный тренд)
+        # 6. Доля высоких всплесков (выше 90-го перцентиля) - ВЫСОКИЙ ПОРОГ
+        high_threshold = np.percentile(audio_data, 90)
+        high_spike_ratio = np.mean(audio_data > high_threshold)
+        
+        # 7. Тенденция изменения (линейный тренд)
         if len(audio_data) > 1:
             x = np.arange(len(audio_data))
             trend = np.polyfit(x, audio_data, 1)[0]
         else:
             trend = 0.0
         
-        # 7. Регулярность (автокорреляция с лагом 1)
+        # 8. Регулярность (автокорреляция с лагом 1)
         if len(audio_data) > 1:
             regularity = np.corrcoef(audio_data[:-1], audio_data[1:])[0, 1]
             if np.isnan(regularity):
@@ -162,25 +159,36 @@ class SnoringFeatureExtractor:
         else:
             regularity = 0.0
         
+        # 9. Логарифмические признаки (для лучшей чувствительности)
+        # Добавляем 1 для избежания log(0)
+        log_data = np.log1p(audio_data)  # log(1 + x)
+        log_mean = float(np.mean(log_data))
+        log_std = float(np.std(log_data))
+        log_max = float(np.max(log_data))
+        
         return {
             'mean': mean_level,
             'max': max_level,
             'std': std_dev,
             'relative_std': float(relative_std),
-            'high_threshold_ratio': float(high_threshold_ratio),
+            'low_threshold_ratio': float(low_threshold_ratio),
+            'high_spike_ratio': float(high_spike_ratio),
             'trend': float(trend),
-            'regularity': float(regularity)
+            'regularity': float(regularity),
+            'log_mean': log_mean,
+            'log_std': log_std,
+            'log_max': log_max
         }
     
     def extract_accelerometer_features(self, accel_data: np.ndarray) -> Dict[str, float]:
         """
-        Extract 3 improved features for one accelerometer axis
+        Extract 3 features for one accelerometer axis
         
         Args:
             accel_data: Array of accelerometer values for one axis
             
         Returns:
-            Dictionary with 3 improved features
+            Dictionary with 3 features
         """
         if len(accel_data) < 2:
             return {
@@ -198,9 +206,8 @@ class SnoringFeatureExtractor:
         # 2. Максимальная активность (самый сильный импульс)
         max_activity = np.max(deltas)
         
-        # 3. Доля времени с движением (выше 40-го перцентиля) - УЛУЧШЕННЫЙ ПОРОГ
-        # Вместо 50-го используем 40-й для лучшей чувствительности
-        movement_threshold = np.percentile(deltas, 40)
+        # 3. Доля времени с движением (выше порога)
+        movement_threshold = np.percentile(deltas, 50)  # медиана
         movement_ratio = np.mean(deltas > movement_threshold)
         
         return {
@@ -211,31 +218,22 @@ class SnoringFeatureExtractor:
     
     def extract_mixed_features(self, audio_features: Dict[str, Dict[str, float]]) -> Dict[str, float]:
         """
-        Extract 2 improved mixed features with logarithmic transforms
+        Extract 2 mixed features
         
         Args:
             audio_features: Dictionary with features for each audio channel
             
         Returns:
-            Dictionary with 2 improved mixed features
+            Dictionary with 2 mixed features
         """
-        # 1. b400/b100 ratio with logarithmic transform
+        # 1. b400/b100 ratio
         b400_mean = audio_features['b400']['mean']
         b100_mean = audio_features['b100']['mean']
+        b400_b100_ratio = b400_mean / (b100_mean + 1e-8)
         
-        # Use logarithmic ratio for better scaling
-        if b100_mean > 0 and b400_mean > 0:
-            b400_b100_ratio = np.log1p(b400_mean) / np.log1p(b100_mean)
-        else:
-            b400_b100_ratio = 1.0  # Default value
-        
-        # 2. b400/b1000 ratio with logarithmic transform
+        # 2. b400/b1000 ratio
         b1000_mean = audio_features['b1000']['mean']
-        
-        if b1000_mean > 0 and b400_mean > 0:
-            b400_b1000_ratio = np.log1p(b400_mean) / np.log1p(b1000_mean)
-        else:
-            b400_b1000_ratio = 1.0  # Default value
+        b400_b1000_ratio = b400_mean / (b1000_mean + 1e-8)
         
         return {
             'b400_b100_ratio': float(b400_b100_ratio),
@@ -244,45 +242,30 @@ class SnoringFeatureExtractor:
     
     def extract_features_from_window(self, window_data: pd.DataFrame) -> np.ndarray:
         """
-        Extract all 39 improved features from one window
+        Extract all 55 features from one window
         
         Args:
             window_data: DataFrame with 80 rows of sensor data
             
         Returns:
-            Array of 39 improved features
+            Array of 55 features
         """
         features = []
         
-        # Extract audio features (28 features: 7 per channel × 4 channels)
+        # Extract audio features (44 features)
         for channel in self.audio_channels:
             if channel in window_data.columns:
                 channel_data = window_data[channel].values
                 channel_features = self.extract_audio_features(channel_data)
-                
-                # Add basic features
                 features.extend([channel_features[key] for key in [
-                    'mean', 'max', 'std', 'relative_std', 
-                    'high_threshold_ratio', 'trend', 'regularity'
+                    'mean', 'max', 'std', 'relative_std', 'low_threshold_ratio',
+                    'high_spike_ratio', 'trend', 'regularity', 'log_mean', 'log_std', 'log_max'
                 ]])
-                
-                # Add logarithmic features (replacing some basic features for better sensitivity)
-                if channel_features['mean'] > 0:
-                    log_mean = np.log1p(channel_features['mean'])
-                    log_std = np.log1p(channel_features['std']) if channel_features['std'] > 0 else 0.0
-                else:
-                    log_mean = 0.0
-                    log_std = 0.0
-                
-                # Replace std and relative_std with logarithmic versions for better scaling
-                features[-3] = log_std  # Replace std with log_std
-                features[-4] = log_mean  # Replace relative_std with log_mean
-                
             else:
                 # If channel missing, fill with zeros
-                features.extend([0.0] * 7)
+                features.extend([0.0] * 11)
         
-        # Extract accelerometer features (9 features: 3 per axis × 3 axes)
+        # Extract accelerometer features (9 features)
         for axis in self.accel_axes:
             if axis in window_data.columns:
                 axis_data = window_data[axis].values
@@ -310,13 +293,12 @@ class SnoringFeatureExtractor:
         
         return np.array(features)
     
-    def extract_features_from_csv(self, csv_path: Path, base_date: datetime.date = None) -> Tuple[np.ndarray, List[datetime]]:
+    def extract_features_from_csv(self, csv_path: Path) -> Tuple[np.ndarray, List[datetime]]:
         """
         Extract features from one CSV file
         
         Args:
             csv_path: Path to CSV file
-            base_date: Base date to use for time parsing
             
         Returns:
             Tuple of (features_array, window_times)
@@ -324,8 +306,8 @@ class SnoringFeatureExtractor:
         # Load CSV data
         data = pd.read_csv(csv_path, sep=';')
         
-        # Parse start time from filename using base_date
-        start_time = self.parse_time_from_filename(csv_path.name, base_date)
+        # Parse start time from filename
+        start_time = self.parse_time_from_filename(csv_path.name)
         
         # Create sliding windows
         windows = self.create_sliding_windows(data, start_time)
@@ -347,13 +329,14 @@ class SnoringFeatureExtractor:
         Get list of feature names
         
         Returns:
-            List of 39 feature names
+            List of 55 feature names
         """
         feature_names = []
         
-        # Audio features (28)
+        # Audio features (44)
         for channel in self.audio_channels:
-            for feature in ['mean', 'max', 'std', 'relative_std', 'high_threshold_ratio', 'trend', 'regularity']:
+            for feature in ['mean', 'max', 'std', 'relative_std', 'low_threshold_ratio',
+                          'high_spike_ratio', 'trend', 'regularity', 'log_mean', 'log_std', 'log_max']:
                 feature_names.append(f"{channel}_{feature}")
         
         # Accelerometer features (9)

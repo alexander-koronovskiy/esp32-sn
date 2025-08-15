@@ -1,0 +1,55 @@
+ 0: b100_mean
+ 1: b100_max
+ 2: b100_std
+ 3: b100_relative_std
+ 4: b100_low_threshold_ratio
+ 5: b100_high_spike_ratio
+ 6: b100_trend
+ 7: b100_regularity
+ 8: b100_log_mean
+ 9: b100_log_std
+10: b100_log_max
+11: b400_mean
+12: b400_max
+13: b400_std
+14: b400_relative_std
+15: b400_low_threshold_ratio
+16: b400_high_spike_ratio
+17: b400_trend
+18: b400_regularity
+19: b400_log_mean
+20: b400_log_std
+21: b400_log_max
+22: b1000_mean
+23: b1000_max
+24: b1000_std
+25: b1000_relative_std
+26: b1000_low_threshold_ratio
+27: b1000_high_spike_ratio
+28: b1000_trend
+29: b1000_regularity
+30: b1000_log_mean
+31: b1000_log_std
+32: b1000_log_max
+33: env_mean
+34: env_max
+35: env_std
+36: env_relative_std
+37: env_low_threshold_ratio
+38: env_high_spike_ratio
+39: env_trend
+40: env_regularity
+41: env_log_mean
+42: env_log_std
+43: env_log_max
+44: accel_x_mean_activity
+45: accel_x_max_activity
+46: accel_x_movement_ratio
+47: accel_y_mean_activity
+48: accel_y_max_activity
+49: accel_y_movement_ratio
+50: accel_z_mean_activity
+51: accel_z_max_activity
+52: accel_z_movement_ratio
+53: b400_b100_ratio
+54: b400_b1000_ratio

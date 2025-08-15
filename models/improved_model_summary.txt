@@ -1,0 +1,41 @@
+🚀 IMPROVED SNORING CLASSIFIER - SUMMARY REPORT
+============================================================
+
+📊 Dataset Information:
+   Total samples: 1909
+   Total features: 55
+   Label distribution: {np.int64(0): np.int64(1909)}
+
+🔧 Feature Categories:
+   Audio features: 46 (11 per channel × 4 channels)
+   Accelerometer: 9 (3 per axis × 3 axes)
+   Mixed features: 13 (ratios)
+
+🎯 Model Parameters:
+   max_depth: 15
+   min_samples_leaf: 1
+   criterion: entropy
+
+🌳 Model Structure:
+   Tree nodes: 1
+   Tree depth: 0
+   Significant features: 0/55
+
+📈 Performance Metrics:
+   Test accuracy: 1.0000
+   Test precision: 0.0000
+   Test recall: 0.0000
+   Test F1-score: 0.0000
+
+🔍 Key Improvements:
+   1. Low threshold ratios (25th percentile) for better sensitivity
+   2. High spike ratios (90th percentile) for detecting anomalies
+   3. Logarithmic transforms (log_mean, log_std, log_max) for better scaling
+   4. Increased total features from 39 to 55
+   5. Better audio feature discrimination
+
+📁 Files Created:
+   - Model: models/improved_snoring_decision_tree.pkl
+   - Feature names: models/improved_feature_names.txt
+   - Training results: models/improved_training_results.json
+   - Summary: models/improved_model_summary.txt

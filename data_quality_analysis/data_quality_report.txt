@@ -1,0 +1,24 @@
+🔍 DATA QUALITY ANALYSIS REPORT
+==================================================
+
+📊 Dataset Overview:
+   Total samples: 2495
+   Total features: 39
+   Class distribution: {np.int64(0): np.int64(2485), np.int64(1): np.int64(10)}
+
+📋 Feature Categories:
+   Audio features: 30
+   Accelerometer: 9
+   Mixed features: 9
+
+🔍 Data Quality Issues:
+   NaN values: 0
+   Infinite values: 0
+   Zero variance features: 0
+
+🎯 Recommendations:
+   1. The extreme class imbalance (99.6% vs 0.4%) makes learning difficult
+   2. Only 10 snoring samples may not be enough for reliable training
+   3. Consider collecting more snoring data or using data augmentation
+   4. Audio features may need different thresholds or preprocessing
+   5. The model relies heavily on accelerometer data
