@@ -1,0 +1,255 @@
+{
+  "model_type": "old_model",
+  "hyperparameters": {
+    "max_depth": 15,
+    "min_samples_leaf": 1,
+    "criterion": "entropy"
+  },
+  "feature_importances": [
+    {
+      "index": 0,
+      "feature_name": "b100_mean",
+      "importance": 0.012749686238630951,
+      "category": "Audio (b100)"
+    },
+    {
+      "index": 1,
+      "feature_name": "b100_max",
+      "importance": 0.0,
+      "category": "Audio (b100)"
+    },
+    {
+      "index": 2,
+      "feature_name": "b100_log_std",
+      "importance": 0.0,
+      "category": "Audio (b100)"
+    },
+    {
+      "index": 3,
+      "feature_name": "b100_log_mean",
+      "importance": 0.002778938155712582,
+      "category": "Audio (b100)"
+    },
+    {
+      "index": 4,
+      "feature_name": "b100_high_threshold_ratio",
+      "importance": 0.0,
+      "category": "Audio (b100)"
+    },
+    {
+      "index": 5,
+      "feature_name": "b100_trend",
+      "importance": 1.5043076805302277e-16,
+      "category": "Audio (b100)"
+    },
+    {
+      "index": 6,
+      "feature_name": "b100_regularity",
+      "importance": 0.0,
+      "category": "Audio (b100)"
+    },
+    {
+      "index": 7,
+      "feature_name": "b400_mean",
+      "importance": 0.03432980171785817,
+      "category": "Audio (b400)"
+    },
+    {
+      "index": 8,
+      "feature_name": "b400_max",
+      "importance": 0.0,
+      "category": "Audio (b400)"
+    },
+    {
+      "index": 9,
+      "feature_name": "b400_log_std",
+      "importance": 0.0,
+      "category": "Audio (b400)"
+    },
+    {
+      "index": 10,
+      "feature_name": "b400_log_mean",
+      "importance": 0.0,
+      "category": "Audio (b400)"
+    },
+    {
+      "index": 11,
+      "feature_name": "b400_high_threshold_ratio",
+      "importance": 0.0,
+      "category": "Audio (b400)"
+    },
+    {
+      "index": 12,
+      "feature_name": "b400_trend",
+      "importance": 0.0,
+      "category": "Audio (b400)"
+    },
+    {
+      "index": 13,
+      "feature_name": "b400_regularity",
+      "importance": 0.0,
+      "category": "Audio (b400)"
+    },
+    {
+      "index": 14,
+      "feature_name": "b1000_mean",
+      "importance": 0.0,
+      "category": "Audio (b1000)"
+    },
+    {
+      "index": 15,
+      "feature_name": "b1000_max",
+      "importance": 0.0,
+      "category": "Audio (b1000)"
+    },
+    {
+      "index": 16,
+      "feature_name": "b1000_log_std",
+      "importance": 0.33782291436505146,
+      "category": "Audio (b1000)"
+    },
+    {
+      "index": 17,
+      "feature_name": "b1000_log_mean",
+      "importance": 0.0,
+      "category": "Audio (b1000)"
+    },
+    {
+      "index": 18,
+      "feature_name": "b1000_high_threshold_ratio",
+      "importance": 0.0,
+      "category": "Audio (b1000)"
+    },
+    {
+      "index": 19,
+      "feature_name": "b1000_trend",
+      "importance": 0.0,
+      "category": "Audio (b1000)"
+    },
+    {
+      "index": 20,
+      "feature_name": "b1000_regularity",
+      "importance": 0.0,
+      "category": "Audio (b1000)"
+    },
+    {
+      "index": 21,
+      "feature_name": "env_mean",
+      "importance": 0.0,
+      "category": "Audio (env)"
+    },
+    {
+      "index": 22,
+      "feature_name": "env_max",
+      "importance": 0.0,
+      "category": "Audio (env)"
+    },
+    {
+      "index": 23,
+      "feature_name": "env_log_std",
+      "importance": 2.8273053408270115e-17,
+      "category": "Audio (env)"
+    },
+    {
+      "index": 24,
+      "feature_name": "env_log_mean",
+      "importance": 0.013261002618095829,
+      "category": "Audio (env)"
+    },
+    {
+      "index": 25,
+      "feature_name": "env_high_threshold_ratio",
+      "importance": 0.0,
+      "category": "Audio (env)"
+    },
+    {
+      "index": 26,
+      "feature_name": "env_trend",
+      "importance": 0.0,
+      "category": "Audio (env)"
+    },
+    {
+      "index": 27,
+      "feature_name": "env_regularity",
+      "importance": 0.0,
+      "category": "Audio (env)"
+    },
+    {
+      "index": 28,
+      "feature_name": "accel_x_mean_activity",
+      "importance": 0.042953517696284686,
+      "category": "Accelerometer"
+    },
+    {
+      "index": 29,
+      "feature_name": "accel_x_max_activity",
+      "importance": 0.0,
+      "category": "Accelerometer"
+    },
+    {
+      "index": 30,
+      "feature_name": "accel_x_movement_ratio",
+      "importance": 0.0,
+      "category": "Accelerometer"
+    },
+    {
+      "index": 31,
+      "feature_name": "accel_y_mean_activity",
+      "importance": 0.0,
+      "category": "Accelerometer"
+    },
+    {
+      "index": 32,
+      "feature_name": "accel_y_max_activity",
+      "importance": 0.0,
+      "category": "Accelerometer"
+    },
+    {
+      "index": 33,
+      "feature_name": "accel_y_movement_ratio",
+      "importance": 0.0,
+      "category": "Accelerometer"
+    },
+    {
+      "index": 34,
+      "feature_name": "accel_z_mean_activity",
+      "importance": 0.02298611609703666,
+      "category": "Accelerometer"
+    },
+    {
+      "index": 35,
+      "feature_name": "accel_z_max_activity",
+      "importance": 0.0,
+      "category": "Accelerometer"
+    },
+    {
+      "index": 36,
+      "feature_name": "accel_z_movement_ratio",
+      "importance": 0.0,
+      "category": "Accelerometer"
+    },
+    {
+      "index": 37,
+      "feature_name": "b400_b100_ratio",
+      "importance": 0.21200781977398034,
+      "category": "Mixed Features"
+    },
+    {
+      "index": 38,
+      "feature_name": "b400_b1000_ratio",
+      "importance": 0.2310851535499413,
+      "category": "Mixed Features"
+    }
+  ],
+  "summary": {
+    "total_features": 39,
+    "non_zero_importance_features": 14,
+    "top_5_features": [
+      "b1000_log_std (33.8%)",
+      "b400_b1000_ratio (23.1%)", 
+      "b400_b100_ratio (21.2%)",
+      "accel_x_mean_activity (4.3%)",
+      "accel_z_mean_activity (2.3%)"
+    ]
+  }
+} 

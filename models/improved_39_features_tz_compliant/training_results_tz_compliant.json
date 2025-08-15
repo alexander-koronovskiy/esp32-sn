@@ -1,0 +1,149 @@
+{
+  "hyperparameters": {
+    "max_depth": 5,
+    "min_samples_leaf": 10,
+    "criterion": "gini",
+    "class_weight": "balanced"
+  },
+  "data_shapes": {
+    "train": [
+      1145,
+      39
+    ],
+    "validation": [
+      382,
+      39
+    ],
+    "test": [
+      382,
+      39
+    ]
+  },
+  "results": {
+    "train": {
+      "accuracy": 0.9170305676855895,
+      "precision": 0.8607843137254902,
+      "recall": 0.9481641468682506,
+      "f1_score": 0.9023638232271326,
+      "predictions_distribution": [
+        635,
+        510
+      ],
+      "labels_distribution": [
+        682,
+        463
+      ]
+    },
+    "validation": {
+      "accuracy": 0.8952879581151832,
+      "precision": 0.8176795580110497,
+      "recall": 0.9548387096774194,
+      "f1_score": 0.8809523809523809,
+      "predictions_distribution": [
+        201,
+        181
+      ],
+      "labels_distribution": [
+        227,
+        155
+      ]
+    },
+    "test": {
+      "accuracy": 0.9162303664921466,
+      "precision": 0.8682634730538922,
+      "recall": 0.9354838709677419,
+      "f1_score": 0.9006211180124224,
+      "predictions_distribution": [
+        215,
+        167
+      ],
+      "labels_distribution": [
+        227,
+        155
+      ]
+    }
+  },
+  "feature_importances": [
+    0.5306035299990297,
+    0.1927245357308489,
+    0.06287182599240479,
+    0.04078799057451075,
+    0.0347080681279529,
+    0.033919540414083175,
+    0.028106486939055424,
+    0.02396059336906485,
+    0.021549910512384873,
+    0.01604308819760139,
+    0.009278900332157149,
+    0.0043482004983663265,
+    0.0006707285049499341,
+    0.0004266008075897642,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "feature_names": [
+    "b100_mean",
+    "b100_max",
+    "b100_std",
+    "b100_relative_std",
+    "b100_high_threshold_ratio",
+    "b100_trend",
+    "b100_regularity",
+    "b400_mean",
+    "b400_max",
+    "b400_std",
+    "b400_relative_std",
+    "b400_high_threshold_ratio",
+    "b400_trend",
+    "b400_regularity",
+    "b1000_mean",
+    "b1000_max",
+    "b1000_std",
+    "b1000_relative_std",
+    "b1000_high_threshold_ratio",
+    "b1000_trend",
+    "b1000_regularity",
+    "env_mean",
+    "env_max",
+    "env_std",
+    "env_relative_std",
+    "env_high_threshold_ratio",
+    "env_trend",
+    "env_regularity",
+    "accel_x_mean_activity",
+    "accel_x_max_activity",
+    "accel_x_movement_ratio",
+    "accel_y_mean_activity",
+    "accel_y_max_activity",
+    "accel_y_movement_ratio",
+    "accel_z_mean_activity",
+    "accel_z_max_activity",
+    "accel_z_movement_ratio",
+    "b400_b100_ratio",
+    "b400_b1000_ratio"
+  ],
+  "training_date": "2025-08-15T16:53:49.657495"
+}

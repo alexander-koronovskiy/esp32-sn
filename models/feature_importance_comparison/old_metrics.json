@@ -1,0 +1,24 @@
+{
+  "model_type": "old_model",
+  "hyperparameters": {
+    "max_depth": 15,
+    "min_samples_leaf": 1,
+    "criterion": "entropy",
+    "class_weight": null
+  },
+  "quality_metrics": {
+    "accuracy": 0.8850174216027874,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1_score": 0.0
+  },
+  "data_shapes": {
+    "train": [1335, 39],
+    "validation": [287, 39],
+    "test": [287, 39]
+  },
+  "feature_count": 39,
+  "model_description": "Decision Tree с увеличенной глубиной для отладки (не по ТЗ)",
+  "saved_date": "2025-08-15 16:30:00",
+  "notes": "Модель с max_depth=15 для отладки, показывает 0% precision/recall для класса 'храп'"
+} 
