@@ -1,0 +1,40 @@
+feature,importance,category
+b1000_std,0.33782291436505146,Audio (b1000)
+accel_z_mean_activity,0.2310851535499413,Accelerometer
+accel_y_mean_activity,0.21200781977398034,Accelerometer
+b400_high_threshold_ratio,0.057740891778129126,Audio (b400)
+env_trend,0.042953517696284686,Audio (env)
+b400_mean,0.03432980171785817,Audio (b400)
+accel_y_max_activity,0.023222781128240343,Accelerometer
+accel_x_max_activity,0.02298611609703666,Accelerometer
+env_relative_std,0.013261002618095829,Audio (env)
+b100_mean,0.012749686238630951,Audio (b100)
+b400_regularity,0.009061376881038344,Audio (b400)
+b100_relative_std,0.002778938155712582,Audio (b100)
+b100_trend,1.5043076805302277e-16,Audio (b100)
+env_std,2.8273053408270115e-17,Audio (env)
+accel_y_movement_ratio,0.0,Accelerometer
+accel_z_max_activity,0.0,Accelerometer
+accel_x_movement_ratio,0.0,Accelerometer
+accel_z_movement_ratio,0.0,Accelerometer
+accel_x_mean_activity,0.0,Accelerometer
+env_regularity,0.0,Audio (env)
+b400_b100_ratio,0.0,Audio (b400)
+env_high_threshold_ratio,0.0,Audio (env)
+b1000_trend,0.0,Audio (b1000)
+env_max,0.0,Audio (env)
+env_mean,0.0,Audio (env)
+b1000_regularity,0.0,Audio (b1000)
+b100_max,0.0,Audio (b100)
+b1000_high_threshold_ratio,0.0,Audio (b1000)
+b1000_relative_std,0.0,Audio (b1000)
+b1000_max,0.0,Audio (b1000)
+b1000_mean,0.0,Audio (b1000)
+b400_trend,0.0,Audio (b400)
+b400_relative_std,0.0,Audio (b400)
+b400_std,0.0,Audio (b400)
+b400_max,0.0,Audio (b400)
+b100_regularity,0.0,Audio (b100)
+b100_high_threshold_ratio,0.0,Audio (b100)
+b100_std,0.0,Audio (b100)
+b400_b1000_ratio,0.0,Audio (b400)

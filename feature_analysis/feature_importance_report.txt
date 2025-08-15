@@ -1,0 +1,39 @@
+
+Feature Importance Analysis Report
+=================================
+
+Model Performance:
+- Test Accuracy: 0.8850174216027874
+- Test Precision: 0.0
+- Test Recall: 0.0
+- Test F1-Score: 0.0
+
+Feature Statistics:
+- Total Features: 39
+- Significant Features (importance > 0): 14
+- Zero Importance Features: 25
+- Feature Utilization: 35.9%
+
+Top 5 Most Important Features:
+1. b1000_std: 0.337823
+2. accel_z_mean_activity: 0.231085
+3. accel_y_mean_activity: 0.212008
+4. b400_high_threshold_ratio: 0.057741
+5. env_trend: 0.042954
+
+Category Breakdown:
+              importance                        
+                   count     sum    mean     std
+category                                        
+Accelerometer          9  0.4893  0.0544  0.0954
+Audio (b100)           7  0.0155  0.0022  0.0048
+Audio (b1000)          7  0.3378  0.0483  0.1277
+Audio (b400)           9  0.1011  0.0112  0.0208
+Audio (env)            7  0.0562  0.0080  0.0162
+
+Feature Importance Summary:
+- Highest Importance: 0.337823
+- Lowest Importance: 0.000000
+- Mean Importance: 0.025641
+- Median Importance: 0.000000
+- Standard Deviation: 0.071577

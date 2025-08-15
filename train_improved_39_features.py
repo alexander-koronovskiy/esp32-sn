@@ -90,11 +90,6 @@ def train_improved_39_features():
                 window_start = start_time + timedelta(seconds=i * 1)  # 1 second step
                 window_times.append(window_start)
             
-            # Debug: Print first few window times for this file
-            if len(window_times) > 0:
-                print(f"      📅 First window: {window_times[0]}")
-                print(f"      📅 Last window: {window_times[-1]}")
-            
             all_features.append(features)
             all_times.extend(window_times)
             
@@ -108,19 +103,6 @@ def train_improved_39_features():
     # Combine all features
     combined_features = np.vstack(all_features)
     print(f"   📊 Combined features shape: {combined_features.shape}")
-    
-    # Debug: Print annotation times
-    print(f"\n🔍 DEBUG: Annotation times:")
-    if hasattr(data_loader, 'annotations') and data_loader.annotations:
-        for i, (label, start_time, end_time) in enumerate(data_loader.annotations):
-            print(f"   {i+1}. {label}: {start_time} - {end_time}")
-    else:
-        print("   ⚠️  No annotations loaded")
-    
-    # Debug: Print first few window times
-    print(f"\n🔍 DEBUG: First few window times:")
-    for i, window_time in enumerate(all_times[:10]):
-        print(f"   Window {i+1}: {window_time}")
     
     # Get labels for windows
     labels = data_loader.get_labels_for_windows(all_times)
